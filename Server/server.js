@@ -74,10 +74,17 @@ function generateDailyPlan(dishes) {
         d.nutrition && d.nutrition.calories > 300);
     
     // Dinner components: relaxed logic to find items if specific tags are missing
-    // Dinner components: relaxed logic to find items if specific tags are missing, BUT restricted to Vietnamese cuisine
+    // Dinner components: relaxed logic to find items if specific tags are missing, BUT restricted to Vietnamese cuisine AND strict Rice Meal structure
     const isVietnamese = (d) => d.origin && d.origin.toLowerCase().includes('viet');
+    const isRiceMain = (d) => {
+        const name = d.name.toLowerCase();
+        // Exclude standalone dishes
+        const invalidPrefixes = ['bún', 'phở', 'miến', 'mì', 'cháo', 'xôi', 'bánh'];
+        if (invalidPrefixes.some(p => name.startsWith(p))) return false;
+        return true;
+    };
 
-    const mainItems = dishes.filter(d => (hasType(d, 'main') || hasType(d, 'man') || (hasType(d, 'dinner') && d.nutrition && d.nutrition.calories > 350)) && isVietnamese(d));
+    const mainItems = dishes.filter(d => (hasType(d, 'main') || hasType(d, 'man') || (hasType(d, 'dinner') && d.nutrition && d.nutrition.calories > 350)) && isVietnamese(d) && isRiceMain(d));
     const vegItems = dishes.filter(d => (hasType(d, 'vegetable') || hasType(d, 'rau') || d.name.toLowerCase().startsWith('rau') || d.name.toLowerCase().startsWith('nộm')) && isVietnamese(d));
     const soupItems = dishes.filter(d => (hasType(d, 'soup') || hasType(d, 'canh') || d.name.toLowerCase().startsWith('canh')) && isVietnamese(d));
     const sideItems = dishes.filter(d => (hasType(d, 'side') || hasType(d, 'kem')) && isVietnamese(d));
@@ -95,6 +102,24 @@ function generateDailyPlan(dishes) {
         origin: origin || "viet_nam"
     });
 
+    // Smart Combos Definition
+    const COMBOS = {
+        "vn_030": { // Thịt luộc mắm tép
+            veg: "vn_051", // Rau muống luộc dầm sấu
+            soup: {
+                id: "combo_soup_030",
+                name: "Nước rau luộc dầm sấu",
+                origin: "viet_nam",
+                meal: ["soup"],
+                nutrition: { calories: 15, protein: 0, fat: 0, carbs: 3 },
+                nutrition_tags: ["light", "low_cal"],
+                context_tags: ["nong", "nhanh"],
+                portion: "bowl",
+                reason: "Nước luộc rau thanh mát dầm sấu chua dịu, tận dụng từ rau muống luộc"
+            }
+        }
+    };
+
     // Breakfast
     const breakfast = getRandom(breakfastItems) || def("def_bf_1", "Bánh mì trứng (Default)", ["breakfast"], 350, "Bữa sáng nhanh gọn", "viet_nam");
 
@@ -103,8 +128,33 @@ function generateDailyPlan(dishes) {
 
     // Dinner components
     const dinnerMain = getRandom(mainItems) || def("def_din_main_1", "Thịt rang cháy cạnh (Default)", ["main"], 500, "Món mặn đưa cơm", "viet_bac");
-    const dinnerVeg = getRandom(vegItems) || def("def_din_veg_1", "Rau muống luộc (Default)", ["vegetable"], 50, "Rau xanh thanh mát", "viet_nam");
-    const dinnerSoup = getRandom(soupItems) || def("def_din_soup_1", "Nước rau luộc dầm sấu (Default)", ["soup"], 20, "Canh chua giải nhiệt", "viet_bac");
+    // const dinnerMain = dishes.find(d => d.id === "vn_030") || def("def_din_main_1", "Thịt luộc (Fallback)", ["main"], 500, "", "viet_nam");
+    
+    // Determine Side/Veg/Soup (Base or Combo)
+    let dinnerVeg, dinnerSoup;
+
+    if (COMBOS[dinnerMain.id]) {
+        const combo = COMBOS[dinnerMain.id];
+        
+        // Find Veg
+        if (typeof combo.veg === 'string') {
+            dinnerVeg = dishes.find(d => d.id === combo.veg);
+        } else {
+            dinnerVeg = combo.veg;
+        }
+
+        // Find Soup
+        if (typeof combo.soup === 'string') {
+            dinnerSoup = dishes.find(d => d.id === combo.soup);
+        } else {
+            dinnerSoup = combo.soup;
+        }
+    }
+
+    // Fallback if not set by combo or combo item not found
+    if (!dinnerVeg) dinnerVeg = getRandom(vegItems) || def("def_din_veg_1", "Rau muống luộc (Default)", ["vegetable"], 50, "Rau xanh thanh mát", "viet_nam");
+    
+    if (!dinnerSoup) dinnerSoup = getRandom(soupItems) || def("def_din_soup_1", "Canh trứng cà chua (Default)", ["soup"], 150, "Canh lành tính dễ ăn", "viet_nam");
     
     const dinnerRice = { 
         id: "com_trang", 
