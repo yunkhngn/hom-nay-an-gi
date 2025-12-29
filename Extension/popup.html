@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hôm nay ăn gì?</title>
+  <link rel="stylesheet" href="popup.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <div class="glass-panel">
+      <header>
+        <div class="header-content">
+          <h1>Hôm nay ăn gì?</h1>
+          <p id="current-date">--/--/----</p>
+        </div>
+        <div class="total-badge">
+          <span id="total-kcal">...</span> kcal
+        </div>
+      </header>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="breakfast">Sáng</button>
+        <button class="tab-btn" data-tab="lunch">Trưa</button>
+        <button class="tab-btn" data-tab="dinner">Tối</button>
+      </div>
+
+      <div id="loading" class="state-view">
+        <div class="spinner"></div>
+      </div>
+
+      <div id="error" class="state-view hidden">
+        <p>Mất kết nối server</p>
+        <button id="retry-btn">Thử lại</button>
+      </div>
+
+      <main id="meal-content" class="hidden">
+        
+        <!-- Tab Content: Breakfast -->
+        <div id="tab-breakfast" class="tab-pane active">
+          <div class="meal-monitor">
+            <div class="icon-box">☀️</div>
+            <div class="info-box">
+              <h2 id="bf-name">...</h2>
+              <p id="bf-reason" class="desc">...</p>
+              <div class="meta-tag" id="bf-cal">... kcal</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Content: Lunch -->
+        <div id="tab-lunch" class="tab-pane">
+          <div class="meal-monitor">
+            <div class="icon-box">🌥️</div>
+            <div class="info-box">
+              <h2 id="lunch-name">...</h2>
+              <p id="lunch-reason" class="desc">...</p>
+              <div class="meta-tag" id="lunch-cal">... kcal</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Content: Dinner -->
+        <div id="tab-dinner" class="tab-pane">
+          <div class="dinner-list" id="dinner-list">
+            <!-- Items injected via JS -->
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

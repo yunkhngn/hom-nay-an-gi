@@ -28,7 +28,6 @@ function getData() {
     }
 }
 
-// Simple seeded random generator (Mulberry32)
 function splitmix32(a) {
     return function() {
       a |= 0; a = a + 0x9e3779b9 | 0;
@@ -40,7 +39,6 @@ function splitmix32(a) {
     }
 }
 
-// Logic to generate daily plan
 function generateDailyPlan(dishes) {
     // Generate seed from today's date
     const today = new Date();
@@ -76,10 +74,13 @@ function generateDailyPlan(dishes) {
         d.nutrition && d.nutrition.calories > 300);
     
     // Dinner components: relaxed logic to find items if specific tags are missing
-    const mainItems = dishes.filter(d => hasType(d, 'main') || hasType(d, 'man') || (hasType(d, 'dinner') && d.nutrition && d.nutrition.calories > 350));
-    const vegItems = dishes.filter(d => hasType(d, 'vegetable') || hasType(d, 'rau') || d.name.toLowerCase().startsWith('rau') || d.name.toLowerCase().startsWith('nộm'));
-    const soupItems = dishes.filter(d => hasType(d, 'soup') || hasType(d, 'canh') || d.name.toLowerCase().startsWith('canh'));
-    const sideItems = dishes.filter(d => hasType(d, 'side') || hasType(d, 'kem'));
+    // Dinner components: relaxed logic to find items if specific tags are missing, BUT restricted to Vietnamese cuisine
+    const isVietnamese = (d) => d.origin && d.origin.toLowerCase().includes('viet');
+
+    const mainItems = dishes.filter(d => (hasType(d, 'main') || hasType(d, 'man') || (hasType(d, 'dinner') && d.nutrition && d.nutrition.calories > 350)) && isVietnamese(d));
+    const vegItems = dishes.filter(d => (hasType(d, 'vegetable') || hasType(d, 'rau') || d.name.toLowerCase().startsWith('rau') || d.name.toLowerCase().startsWith('nộm')) && isVietnamese(d));
+    const soupItems = dishes.filter(d => (hasType(d, 'soup') || hasType(d, 'canh') || d.name.toLowerCase().startsWith('canh')) && isVietnamese(d));
+    const sideItems = dishes.filter(d => (hasType(d, 'side') || hasType(d, 'kem')) && isVietnamese(d));
 
     // Rich Default Helper
     const def = (id, name, mealArr, cal, reason, origin) => ({ 

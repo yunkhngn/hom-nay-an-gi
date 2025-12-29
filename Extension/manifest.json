@@ -1,0 +1,13 @@
+{
+    "manifest_version": 3,
+    "name": "Hôm nay ăn gì?",
+    "version": "1.0",
+    "description": "Gợi ý thực đơn hôm nay ăn gì cho bạn.",
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "Hôm nay ăn gì?"
+    },
+    "host_permissions": [
+        "http://localhost:3000/*"
+    ]
+}
